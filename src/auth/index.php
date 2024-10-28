@@ -35,11 +35,11 @@
 
                 <form action="bn_login.php" method="post">
                   <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Username</label>
+                    <label for="exampleInputEmail1" class="form-label">ชื่อผู้ใช้</label>
                     <input type="text" name="username" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
                   </div>
                   <div class="mb-4">
-                    <label for="exampleInputPassword1" class="form-label">Password</label>
+                    <label for="exampleInputPassword1" class="form-label">รหัสผ่าน</label>
                     <input type="password" name="password" class="form-control" id="exampleInputPassword1">
                   </div>
 
