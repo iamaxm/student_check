@@ -1,5 +1,5 @@
 <?php
-session_start();
+@session_start();
 include '../config/ConnectDB.php';
 
 // Get current admin id from session username
@@ -15,13 +15,13 @@ $room_result = $conn->query($room_sql);
 
 // Fetch teachers list for display, joining with room and admin tables
 $teacher_sql = "
-    SELECT teacher.id, teacher.name, teacher.surname, teacher.created_at, room.name AS room_name, admin.username AS created_by 
+    SELECT teacher.id, teacher.name, teacher.surname, teacher.created_at, room.name AS room_name, room.id AS id_room, admin.username AS created_by 
     FROM teacher
     LEFT JOIN room ON teacher.id_room = room.id
     LEFT JOIN admin ON teacher.id_admin = admin.id";
 $teacher_result = $conn->query($teacher_sql);
 
-// ตรวจสอบว่าการ query สำเร็จหรือไม่
+// Check if query was successful
 if (!$teacher_result) {
     die("Error in SQL query: " . $conn->error);
 }
@@ -82,20 +82,23 @@ if (!$teacher_result) {
                                         <td>
                                             <center><?php echo $teacher_row['created_by']; ?></center>
                                         </td>
-                                        <td>
-                                            <center><?php echo $teacher_row['created_at']; ?></center>
-                                        </td>
+                                        <td><center><?php echo date("d/m/Y H:i:s", strtotime($teacher_row['created_at'])); ?></center></td>
                                         <td>
                                             <center>
                                                 <button type="button" class="btn btn-outline-warning m-1" data-bs-toggle="modal" data-bs-target="#editTeacherModal<?php echo $teacher_row['id']; ?>">
-                                                    แก้ไข
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
+                                                    </svg>&nbsp;แก้ไข
                                                 </button>
                                             </center>
                                         </td>
                                         <td>
                                             <center>
                                                 <button type="button" class="btn btn-outline-danger m-1" data-bs-toggle="modal" data-bs-target="#deleteTeacherModal<?php echo $teacher_row['id']; ?>">
-                                                    ลบ
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
+                                                    </svg>&nbsp;ลบ
                                                 </button>
                                             </center>
                                         </td>
@@ -124,14 +127,17 @@ if (!$teacher_result) {
                                                         <div class="mb-3">
                                                             <label for="editRoom<?php echo $teacher_row['id']; ?>" class="form-label">ห้องเรียน</label>
                                                             <select class="form-select" id="editRoom<?php echo $teacher_row['id']; ?>" name="id_room" required>
-                                                                <?php foreach ($room_result as $room) : ?>
-                                                                    <option value="<?php echo $room['id']; ?>" <?php echo (isset($teacher_row['id_room']) && $teacher_row['id_room'] == $room['id']) ? 'selected' : ''; ?>>
+                                                                <?php
+                                                                // Reset the pointer of $room_result
+                                                                mysqli_data_seek($room_result, 0);
+                                                                while ($room = $room_result->fetch_assoc()) : ?>
+                                                                    <option value="<?php echo $room['id']; ?>" <?php echo ($teacher_row['id_room'] == $room['id']) ? 'selected' : ''; ?>>
                                                                         <?php echo $room['name']; ?>
                                                                     </option>
-                                                                <?php endforeach; ?>
+                                                                <?php endwhile; ?>
                                                             </select>
-
                                                         </div>
+
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
@@ -196,9 +202,11 @@ if (!$teacher_result) {
                         <label for="id_room" class="form-label">ห้องเรียน</label>
                         <select class="form-select" id="id_room" name="id_room" required>
                             <option selected="" disabled hidden>เลือกห้องเรียน</option>
-                            <?php foreach ($room_result as $room) : ?>
+                            <?php
+                            mysqli_data_seek($room_result, 0);
+                            while ($room = $room_result->fetch_assoc()) : ?>
                                 <option value="<?php echo $room['id']; ?>"><?php echo $room['name']; ?></option>
-                            <?php endforeach; ?>
+                            <?php endwhile; ?>
                         </select>
                     </div>
                 </div>

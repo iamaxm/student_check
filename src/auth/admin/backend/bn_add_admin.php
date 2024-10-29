@@ -104,7 +104,7 @@ if (empty($username)) {
             timer:1500,
             showConfirmButton: false 
         }, function() {
-            window.location.href = "../index.php";
+            window.location.href = "../index.php?id=admin";
           });
     }, 100); 
     </script>';

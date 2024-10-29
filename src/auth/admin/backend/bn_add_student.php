@@ -7,10 +7,10 @@ include '../../config/ConnectDB.php';
 
 $name = mysqli_real_escape_string($conn, $_POST['name']);
 $surname = mysqli_real_escape_string($conn, $_POST['surname']);
-$prefix = $_POST['prefix'];
-$id_grade = $_POST['id_grade'];
-$id_room = $_POST['id_room'];
-$id_teacher = $_POST['id_teacher'];
+@$prefix = $_POST['prefix'];
+@$id_grade = $_POST['id_grade'];
+@$id_room = $_POST['id_room'];
+@$id_teacher = $_POST['id_teacher'];
 $id_admin = $_POST['id_admin'];
 
 // ตรวจสอบค่าว่าง

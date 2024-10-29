@@ -1,5 +1,5 @@
 <?php
-session_start();
+@session_start();
 
 include '../config/ConnectDB.php';
 
@@ -25,25 +25,23 @@ $grade_result = $conn->query($grade_sql);
                         <table class="table text-nowrap mb-0 align-middle">
                             <thead class="text-dark fs-4">
                                 <tr>
-                                    <th class="border-bottom-0">
+                                    <th>
                                         <center>
-                                            <h6 class="fw-semibold mb-0">ชั้นเรียน</h6>
+                                            ชั้นเรียน
                                         </center>
                                     </th>
-                                    <th class="border-bottom-0">
+                                    <th>
                                         <center>
-                                            <h6 class="fw-semibold mb-0">สร้างเมื่อ</h6>
+                                            สร้างเมื่อ
                                         </center>
                                     </th>
-                                    <th class="border-bottom-0">
+                                    <th>
                                         <center>
-                                            <h6 class="fw-semibold mb-0">แก้ไข</h6>
-                                        </center>
+                                            แก้ไข</ </center>
                                     </th>
-                                    <th class="border-bottom-0">
+                                    <th>
                                         <center>
-                                            <h6 class="fw-semibold mb-0">ลบ</h6>
-                                        </center>
+                                            ลบ</ </center>
                                     </th>
 
                                 </tr>
@@ -51,17 +49,13 @@ $grade_result = $conn->query($grade_sql);
                             <tbody>
                                 <?php while ($grade_row = mysqli_fetch_array($grade_result)) : ?>
                                     <tr>
-                                        <td class="border-bottom-0">
+                                        <td>
                                             <center>
-                                                <h6 class="fw-semibold mb-0"><?php echo $grade_row['grade_level'] ?></h6>
+                                                <?php echo $grade_row['grade_level'] ?>
                                             </center>
                                         </td>
-                                        <td class="border-bottom-0">
-                                            <center>
-                                                <h6 class="fw-semibold mb-0 fs-4"><?php echo $grade_row['created_at'] ?></h6>
-                                            </center>
-                                        </td>
-                                        <td class="border-bottom-0">
+                                        <td><center><?php echo date("d/m/Y H:i:s", strtotime($grade_row['created_at'])); ?></center></td>
+                                        <td>
                                             <center> <button type="button" class="btn btn-outline-warning m-1" data-bs-toggle="modal" data-bs-target="#editGradeLevelModal<?php echo $grade_row['id']; ?>">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
                                                         <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
@@ -70,7 +64,7 @@ $grade_result = $conn->query($grade_sql);
                                                 </button></center>
 
                                         </td>
-                                        <td class="border-bottom-0">
+                                        <td>
                                             <center><button type="button" class="btn btn-outline-danger m-1" data-bs-toggle="modal" data-bs-target="#deleteGradeLevelModal<?php echo $grade_row['id']; ?>">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
                                                         <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
@@ -106,26 +100,26 @@ $grade_result = $conn->query($grade_sql);
                                     </div>
 
                                     <!-- Modal ยืนยันการลบ -->
-<div class="modal fade" id="deleteGradeLevelModal<?php echo $grade_row['id']; ?>" tabindex="-1" aria-labelledby="deleteGradeLevelModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="backend/bn_delete_grade_level.php" method="POST">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteGradeLevelModalLabel">ยืนยันการลบชั้นเรียน</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>คุณแน่ใจหรือไม่ว่าต้องการลบชั้นเรียน "<strong><?php echo $grade_row['grade_level']; ?></strong>"?</p>
-                    <input type="hidden" name="grade_id" value="<?php echo $grade_row['id']; ?>">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                    <button type="submit" class="btn btn-danger">ยืนยันการลบ</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+                                    <div class="modal fade" id="deleteGradeLevelModal<?php echo $grade_row['id']; ?>" tabindex="-1" aria-labelledby="deleteGradeLevelModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form action="backend/bn_delete_grade_level.php" method="POST">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteGradeLevelModalLabel">ยืนยันการลบชั้นเรียน</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>คุณแน่ใจหรือไม่ว่าต้องการลบชั้นเรียน "<strong><?php echo $grade_row['grade_level']; ?></strong>"?</p>
+                                                        <input type="hidden" name="grade_id" value="<?php echo $grade_row['id']; ?>">
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                                                        <button type="submit" class="btn btn-danger">ยืนยันการลบ</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 <?php endwhile ?>
                             </tbody>
                         </table>

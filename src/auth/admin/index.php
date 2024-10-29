@@ -1,13 +1,14 @@
 <?php
 session_start();
 
-// ตรวจสอบว่าผู้ใช้เข้าสู่ระบบแล้วหรือไม่
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    // ถ้ายังไม่ได้เข้าสู่ระบบ ให้เปลี่ยนเส้นทางไปยังหน้าเข้าสู่ระบบ
+// ตรวจสอบว่าผู้ใช้เข้าสู่ระบบแล้วหรือไม่และตรวจสอบว่าชื่อผู้ใช้ไม่ใช่ค่าว่าง
+if (empty($_SESSION['username'])) {
+    // ถ้ายังไม่ได้เข้าสู่ระบบ หรือชื่อผู้ใช้เป็นค่าว่าง ให้เปลี่ยนเส้นทางไปยังหน้าเข้าสู่ระบบ
     header("Location: ../index.php");
     exit();
 }
 ?>
+
 <!doctype html>
 <html lang="en">
 
@@ -47,9 +48,9 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                 case "dashboard":
                     include'index.php';
                     break;
-                case "add_admin":
+                case "admin":
                     include 'header.php';
-                    include 'add_admin.php';
+                    include 'admin.php';
                     break;
                 case "grade_level":
                     include 'header.php';
@@ -66,6 +67,14 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                 case "student":
                     include 'header.php';
                     include 'student.php';
+                    break;
+                case "check_name_student":
+                    include 'header.php';
+                    include 'check_name_student.php';
+                    break;
+                case "history_check_inout":
+                    include 'header.php';
+                    include 'history_check_inout.php';
                     break;
                 default:
                     include 'header.php';

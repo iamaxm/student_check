@@ -6,7 +6,7 @@
 include '../../config/ConnectDB.php';
 
 $name = mysqli_real_escape_string($conn, $_POST['name']);
-
+@$grade_id = mysqli_real_escape_string($conn, $_POST['grade_id']);
 // ตรวจสอบว่าฟิลด์ว่างหรือไม่
 if (empty($name)) {
     echo '<script>
@@ -14,6 +14,19 @@ if (empty($name)) {
         swal({
             title: "เกิดข้อผิดพลาด!",
             text: "กรุณากรอกชื่อห้องเรียน!",
+            type: "warning",
+            showConfirmButton: true
+        }, function() {
+            window.history.back();
+        });
+    }, 100);
+    </script>';
+} else if (empty($grade_id)) {
+    echo '<script>
+    setTimeout(function() {
+        swal({
+            title: "เกิดข้อผิดพลาด!",
+            text: "กรุณาเลือกชั้นเรียน!",
             type: "warning",
             showConfirmButton: true
         }, function() {
@@ -31,7 +44,7 @@ if (empty($name)) {
         setTimeout(function() {
             swal({
                 title: "เกิดข้อผิดพลาด!",
-                text: "ชื่อห้องเรียน ' . $grade_level . ' มีอยู่แล้วในระบบ",
+                text: "ชื่อห้องเรียน ' . $name . ' มีอยู่แล้วในระบบ",
                 type: "error",
                 showConfirmButton: true
             }, function() {
@@ -43,7 +56,7 @@ if (empty($name)) {
         date_default_timezone_set('Asia/Bangkok');
         $created_at = date('Y-m-d H:i:s');
         // บันทึกข้อมูลลงในฐานข้อมูล
-        $sql_insert = "INSERT INTO `room`(`name`, `created_at`) VALUES ('$name','$created_at')";
+        $sql_insert = "INSERT INTO `room`(`name`,`grade_id`, `created_at`) VALUES ('$name','$grade_id','$created_at')";
         if (mysqli_query($conn, $sql_insert)) {
             echo '<script>
             setTimeout(function() {

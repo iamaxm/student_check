@@ -14,3 +14,4 @@ cd examples/vite/
 npm install
 npm start
 ```
+// xampp version 8.0.30-0

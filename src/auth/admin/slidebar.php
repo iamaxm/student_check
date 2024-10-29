@@ -34,14 +34,14 @@
           </a>
         </li>
         <li class="sidebar-item">
-          <a class="sidebar-link <?php echo @($_GET['id'] == 'add_admin') ? 'active' : ''; ?>" href="index.php?id=add_admin" aria-expanded="false">
+          <a class="sidebar-link <?php echo @($_GET['id'] == 'admin') ? 'active' : ''; ?>" href="index.php?id=admin" aria-expanded="false">
             <span>
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-person-fill-add" viewBox="0 0 16 16">
                 <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
                 <path d="M2 13c0 1 1 1 1 1h5.256A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1 1.544-3.393Q8.844 9.002 8 9c-5 0-6 3-6 4" />
               </svg>
             </span>
-            <span class="hide-menu">สร้างแอดมิน</span>
+            <span class="hide-menu">แอดมิน</span>
           </a>
         </li>
         <li class="sidebar-item">
@@ -77,6 +77,24 @@
               <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466z" />
             </svg>
             <span class="hide-menu">รายชื่อนักเรียน</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link <?php echo @($_GET['id'] == 'check_name_student') ? 'active' : ''; ?>" href="index.php?id=check_name_student" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-mortarboard-fill" viewBox="0 0 16 16">
+              <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917z" />
+              <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466z" />
+            </svg>
+            <span class="hide-menu">ตารางการเช็คชื่อนักเรียน</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link <?php echo @($_GET['id'] == 'history_check_inout') ? 'active' : ''; ?>" href="index.php?id=history_check_inout" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-mortarboard-fill" viewBox="0 0 16 16">
+              <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917z" />
+              <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466z" />
+            </svg>
+            <span class="hide-menu">ประวัติการเช็คชื่อนักเรียน</span>
           </a>
         </li>
         <!-- <li class="nav-small-cap">
