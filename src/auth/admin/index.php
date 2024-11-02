@@ -76,6 +76,10 @@ if (empty($_SESSION['username'])) {
                     include 'header.php';
                     include 'history_check_inout.php';
                     break;
+                case "manual_check_inout":
+                    include 'header.php';
+                    include 'manual_check_inout.php';
+                    break;
                 default:
                     include 'header.php';
                     include 'dashboard.php';

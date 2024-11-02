@@ -1,29 +1,15 @@
 <?php
 session_start();
-
-
 include('config/ConnectDB.php');
-echo '
-    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert-dev.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css">';
-
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-    // ผู้ใช้เข้าสู่ระบบแล้ว
-    $redirectUrl = "admin/index.php"; // ค่าเริ่มต้นสำหรับผู้ใช้ทั่วไป
+    $redirectUrl = "admin/index.php";
 
-    echo '<script>
-    setTimeout(function() {
-        swal({
-            title: "เกิดข้อผิดพลาด!",
-            text: "คุณได้เข้าสู่ระบบแล้ว!",
-            type: "warning",
-            showConfirmButton: true
-        }, function() {
-            window.location.href = "' . $redirectUrl . '";
-        });
-    }, 100);
-    </script>';
+    echo json_encode([
+        'title' => 'เกิดข้อผิดพลาด!',
+        'message' => 'คุณได้เข้าสู่ระบบแล้ว!',
+        'type' => 'warning',
+        'redirectUrl' => $redirectUrl
+    ]);
     exit();
 }
 
@@ -43,35 +29,20 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
         $_SESSION['username'] = $row['username'];
 
 
-        echo '<script>
-            setTimeout(function() {
-                swal({
-                    title: "ยินดีด้วย!",
-                    text: "เข้าสู่ระบบสำเร็จ!",
-                    type: "success", 
-                    timer: 1500,
-                    showConfirmButton: false
-                }, function() {
-                    window.location.href = "admin/index.php";
-                });
-            }, 100); 
-            </script>';
+        echo json_encode([
+            'title' => 'สำเร็จ!',
+            'message' => 'เข้าสู่ระบบสำเร็จ!',
+            'type' => 'success'
+        ]);
 
         exit();
     } else {
-        // เข้าสู่ระบบไม่สำเร็จ
-        echo '<script>
-        setTimeout(function() {
-            swal({
-                title: "เกิดข้อผิดพลาด!", 
-                text: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!",
-                type: "warning", 
-                showConfirmButton: true
-            }, function() {
-                window.history.back();
-            });
-        }, 100); 
-        </script>';
+        echo json_encode([
+        'title' => 'เกิดข้อผิดพลาด!',
+        'message' => 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!',
+        'type' => 'warning'
+    ]);
+    exit;
         exit();
     }
 }

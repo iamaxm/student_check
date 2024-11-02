@@ -10,6 +10,10 @@
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&family=Noto+Sans+Thai+Looped:wght@100;200;300;400;500;600;700;800;900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+
+  <!-- ลิงก์ jQuery และ SweetAlert2 -->
+  <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <style>
   * {
@@ -33,7 +37,7 @@
                 </a>
                 <h2 class="text-center">เข้าสู่ระบบ</h2>
 
-                <form action="bn_login.php" method="post">
+                <form id="AdminLoginForm">
                   <div class="mb-3">
                     <label for="exampleInputEmail1" class="form-label">ชื่อผู้ใช้</label>
                     <input type="text" name="username" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
@@ -69,6 +73,38 @@
   </div>
   <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
   <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // เข้าสู่ระบบ
+    $('#AdminLoginForm').on('submit', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        url: 'bn_login.php',
+        type: 'POST',
+        data: $(this).serialize(),
+        dataType: 'json',
+        success: function(response) {
+          Swal.fire({
+            title: response.title,
+            text: response.message,
+            icon: response.type,
+            timer: 1500,
+            showConfirmButton: response.type !== 'success'
+          }).then(() => {
+            if (response.type === 'success') {
+              location.href = "admin/index.php";
+            }
+          });
+        },
+        error: function(xhr, status, error) {
+          Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถดำเนินการได้", "error");
+        }
+      });
+    });
+  </script>
+
+
 </body>
 
 </html>

@@ -26,6 +26,9 @@ if (!$teacher_result) {
     die("Error in SQL query: " . $conn->error);
 }
 ?>
+<!-- ลิงก์ jQuery และ SweetAlert2 -->
+<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <div class="container-fluid">
     <!-- Title and Add Teacher Button -->
     <div class="row">
@@ -82,7 +85,9 @@ if (!$teacher_result) {
                                         <td>
                                             <center><?php echo $teacher_row['created_by']; ?></center>
                                         </td>
-                                        <td><center><?php echo date("d/m/Y H:i:s", strtotime($teacher_row['created_at'])); ?></center></td>
+                                        <td>
+                                            <center><?php echo date("d/m/Y H:i:s", strtotime($teacher_row['created_at'])); ?></center>
+                                        </td>
                                         <td>
                                             <center>
                                                 <button type="button" class="btn btn-outline-warning m-1" data-bs-toggle="modal" data-bs-target="#editTeacherModal<?php echo $teacher_row['id']; ?>">
@@ -95,7 +100,7 @@ if (!$teacher_result) {
                                         </td>
                                         <td>
                                             <center>
-                                                <button type="button" class="btn btn-outline-danger m-1" data-bs-toggle="modal" data-bs-target="#deleteTeacherModal<?php echo $teacher_row['id']; ?>">
+                                                <button type="button" class="btn btn-outline-danger m-1 deleteTeacherBtn" data-id="<?php echo $teacher_row['id']; ?>" data-name="<?php echo $teacher_row['name']; ?>" data-surname="<?php echo $teacher_row['surname']; ?>">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
                                                         <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
                                                     </svg>&nbsp;ลบ
@@ -108,7 +113,7 @@ if (!$teacher_result) {
                                     <div class="modal fade" id="editTeacherModal<?php echo $teacher_row['id']; ?>" tabindex="-1" aria-labelledby="editTeacherModalLabel" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
-                                                <form action="backend/bn_edit_teacher.php" method="POST">
+                                                <form class="editTeacherForm" data-id="<?php echo $teacher_row['id']; ?>">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title">แก้ไขข้อมูลคุณครู</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -149,7 +154,7 @@ if (!$teacher_result) {
                                     </div>
 
                                     <!-- Delete Teacher Modal -->
-                                    <div class="modal fade" id="deleteTeacherModal<?php echo $teacher_row['id']; ?>" tabindex="-1" aria-labelledby="deleteTeacherModalLabel" aria-hidden="true">
+                                    <!-- <div class="modal fade" id="deleteTeacherModal<?php echo $teacher_row['id']; ?>" tabindex="-1" aria-labelledby="deleteTeacherModalLabel" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <form action="backend/bn_delete_teacher.php" method="POST">
@@ -168,7 +173,7 @@ if (!$teacher_result) {
                                                 </form>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
@@ -183,7 +188,7 @@ if (!$teacher_result) {
 <div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="backend/bn_add_teacher.php" method="POST">
+            <form id="addTeacherForm">
                 <div class="modal-header">
                     <h5 class="modal-title">เพิ่มคุณครู</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -218,3 +223,98 @@ if (!$teacher_result) {
         </div>
     </div>
 </div>
+
+<script>
+    // เพิ่มครู
+    $('#addTeacherForm').on('submit', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: 'backend/bn_add_teacher.php',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                Swal.fire({
+                    title: response.title,
+                    text: response.message,
+                    icon: response.type,
+                    timer: 1500,
+                    showConfirmButton: response.type !== 'success'
+                }).then(() => {
+                    if (response.type === 'success') location.reload();
+                });
+            },
+            error: function(xhr, status, error) {
+                Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถเพิ่มข้อมูลได้", "error");
+            }
+        });
+    });
+
+    // แก้ไขคุณครู
+    $('.editTeacherForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const teacherId = form.data('id');
+
+            $.ajax({
+                url: 'backend/bn_edit_teacher.php',
+                type: 'POST',
+                data: form.serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    Swal.fire({
+                        title: response.title,
+                        text: response.message,
+                        icon: response.type,
+                        timer: 1500,
+                        showConfirmButton: response.type !== 'success'
+                    }).then(() => {
+                        if (response.type === 'success') location.reload();
+                    });
+                },
+                error: function() {
+                    Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถแก้ไขข้อมูลได้", "error");
+                } 
+            });
+        });
+
+        // ลบครู
+        $('.deleteTeacherBtn').on('click', function() {
+            const teacherId = $(this).data('id');
+            const teacherName = $(this).data('name');
+            const teacherSurname = $(this).data('surname');
+            Swal.fire({
+                title: "ยืนยันการลบ",
+                text: `คุณต้องการลบคุณครู "${teacherName}  ${teacherSurname}" หรือไม่?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#FA896B",
+                confirmButtonText: "ใช่, ลบเลย!",
+                cancelButtonText: "ยกเลิก"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: 'backend/bn_delete_teacher.php',
+                        type: 'POST',
+                        data: { teacher_id: teacherId },
+                        dataType: 'json',
+                        success: function(response) {
+                            Swal.fire({
+                                title: response.title,
+                                text: response.message,
+                                icon: response.type,
+                                timer: 1500,
+                                showConfirmButton: response.type !== 'success'
+                            }).then(() => {
+                                if (response.type === 'success') location.reload();
+                            });
+                        },
+                        error: function() {
+                            Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถลบข้อมูลได้", "error");
+                        }
+                    });
+                }
+            });
+        });
+</script>

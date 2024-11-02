@@ -41,6 +41,9 @@ if (!$student_result) {
     die("Error in SQL query: " . $conn->error);
 }
 ?>
+<!-- ลิงก์ jQuery และ SweetAlert2 -->
+<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <div class="container-fluid">
     <!-- Title and Add Student Button -->
     <div class="row">
@@ -109,12 +112,14 @@ if (!$student_result) {
                                         <td>
                                             <center><?php echo $student_row['created_by']; ?></center>
                                         </td>
-                                        <td><center><?php echo date("d/m/Y H:i:s", strtotime($student_row['created_at'])); ?></center></td>
+                                        <td>
+                                            <center><?php echo date("d/m/Y H:i:s", strtotime($student_row['created_at'])); ?></center>
+                                        </td>
 
                                         <td>
                                             <center>
                                                 <button type="button" class="btn btn-outline-warning m-1" data-bs-toggle="modal" data-bs-target="#editStudentModal<?php echo $student_row['id']; ?>">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
                                                         <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
                                                         <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
                                                     </svg>&nbsp;แก้ไข
@@ -123,8 +128,8 @@ if (!$student_result) {
                                         </td>
                                         <td>
                                             <center>
-                                                <button type="button" class="btn btn-outline-danger m-1" data-bs-toggle="modal" data-bs-target="#deleteStudentModal<?php echo $student_row['id']; ?>">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                                <button type="button" class="btn btn-outline-danger m-1 deleteStudentBtn" data-id="<?php echo $student_row['id']; ?>" data-prefix="<?php echo $student_row['prefix']; ?>" data-name="<?php echo $student_row['name']; ?>" data-surname="<?php echo $student_row['surname']; ?>">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
                                                         <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
                                                     </svg>&nbsp;ลบ
                                                 </button>
@@ -136,13 +141,25 @@ if (!$student_result) {
                                     <div class="modal fade" id="editStudentModal<?php echo $student_row['id']; ?>" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
-                                                <form action="backend/bn_edit_student.php" method="POST">
+                                                <form class="editStudentForm" data-id="<?php echo $student_row['id']; ?>">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title">แก้ไขข้อมูลนักเรียน</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <input type="hidden" name="student_id" value="<?php echo $student_row['id']; ?>">
+
+                                                        <!-- Prefix Field -->
+                                                        <div class="mb-3">
+                                                            <label for="editPrefix<?php echo $student_row['id']; ?>" class="form-label">คำนำหน้าชื่อ</label>
+                                                            <select class="form-select" id="editPrefix<?php echo $student_row['id']; ?>" name="prefix" required>
+                                                                <option selected="" disabled hidden>เลือกคำนำหน้าชื่อ</option>
+                                                                <option value="นาย" <?php echo ($student_row['prefix'] == 'นาย') ? 'selected' : ''; ?>>นาย</option>
+                                                                <option value="นางสาว" <?php echo ($student_row['prefix'] == 'นางสาว') ? 'selected' : ''; ?>>นางสาว</option>
+                                                                <option value="เด็กชาย" <?php echo ($student_row['prefix'] == 'เด็กชาย') ? 'selected' : ''; ?>>เด็กชาย</option>
+                                                                <option value="เด็กหญิง" <?php echo ($student_row['prefix'] == 'เด็กหญิง') ? 'selected' : ''; ?>>เด็กหญิง</option>
+                                                            </select>
+                                                        </div>
 
                                                         <!-- Name Fields -->
                                                         <div class="mb-3">
@@ -194,29 +211,6 @@ if (!$student_result) {
                                             </div>
                                         </div>
                                     </div>
-
-
-                                    <!-- Delete Student Modal -->
-                                    <div class="modal fade" id="deleteStudentModal<?php echo $student_row['id']; ?>" tabindex="-1" aria-labelledby="deleteStudentModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <form action="backend/bn_delete_student.php" method="POST">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">ยืนยันการลบนักเรียน</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <p>คุณแน่ใจหรือไม่ว่าต้องการลบนักเรียน "<strong><?php echo $student_row['prefix'] . '' . $student_row['name'] . " " . $student_row['surname']; ?></strong>"?</p>
-                                                        <input type="hidden" name="student_id" value="<?php echo $student_row['id']; ?>">
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                                                        <button type="submit" class="btn btn-danger">ยืนยันการลบ</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
@@ -231,7 +225,7 @@ if (!$student_result) {
 <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="backend/bn_add_student.php" method="POST">
+            <form id="addStudentForm">
                 <div class="modal-header">
                     <h5 class="modal-title">เพิ่มนักเรียน</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -411,4 +405,102 @@ if (!$student_result) {
             }
         });
     }
+</script>
+
+<script>
+    // เพิ่มนักเรียน
+    $('#addStudentForm').on('submit', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: 'backend/bn_add_student.php',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                Swal.fire({
+                    title: response.title,
+                    text: response.message,
+                    icon: response.type,
+                    timer: 1500,
+                    showConfirmButton: response.type !== 'success'
+                }).then(() => {
+                    if (response.type === 'success') location.reload();
+                });
+            },
+            error: function(xhr, status, error) {
+                Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถเพิ่มข้อมูลได้", "error");
+            }
+        });
+    });
+
+    // แก้ไขนักเรียน
+    $('.editStudentForm').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const studentId = form.data('id');
+
+        $.ajax({
+            url: 'backend/bn_edit_student.php',
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            success: function(response) {
+                Swal.fire({
+                    title: response.title,
+                    text: response.message,
+                    icon: response.type,
+                    timer: 1500,
+                    showConfirmButton: response.type !== 'success'
+                }).then(() => {
+                    if (response.type === 'success') location.reload();
+                });
+            },
+            error: function() {
+                Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถแก้ไขข้อมูลได้", "error");
+            }
+        });
+    });
+
+    // ลบนักเรียน
+    $('.deleteStudentBtn').on('click', function() {
+        const studentId = $(this).data('id');
+        const studentPrefix = $(this).data('prefix');
+        const studentName = $(this).data('name');
+        const studentSurname = $(this).data('surname');
+        Swal.fire({
+            title: "ยืนยันการลบ",
+            text: `คุณต้องการลบนักเรียน "${studentPrefix}${studentName}  ${studentSurname}" หรือไม่?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#FA896B",
+            confirmButtonText: "ใช่, ลบเลย!",
+            cancelButtonText: "ยกเลิก"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: 'backend/bn_delete_student.php',
+                    type: 'POST',
+                    data: {
+                        student_id: studentId
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        Swal.fire({
+                            title: response.title,
+                            text: response.message,
+                            icon: response.type,
+                            timer: 1500,
+                            showConfirmButton: response.type !== 'success'
+                        }).then(() => {
+                            if (response.type === 'success') location.reload();
+                        });
+                    },
+                    error: function() {
+                        Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถลบข้อมูลได้", "error");
+                    }
+                });
+            }
+        });
+    });
 </script>

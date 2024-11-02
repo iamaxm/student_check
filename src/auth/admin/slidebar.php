@@ -97,6 +97,15 @@
             <span class="hide-menu">ประวัติการเช็คชื่อนักเรียน</span>
           </a>
         </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link <?php echo @($_GET['id'] == 'manual_check_inout') ? 'active' : ''; ?>" href="index.php?id=manual_check_inout" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-mortarboard-fill" viewBox="0 0 16 16">
+              <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917z" />
+              <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466z" />
+            </svg>
+            <span class="hide-menu">เช็คชื่อเข้า-ออกด้วยตนเอง</span>
+          </a>
+        </li>
         <!-- <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">UI COMPONENTS</span>
