@@ -151,99 +151,113 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
 
-    // กำหนดวันที่ปัจจุบัน
-    const today = new Date();
-    today.setHours(today.getHours() + 7); // ปรับเวลาเป็น GMT+7 (Time Zone ไทย)
-    const formattedToday = today.toISOString().split('T')[0];
+            // กำหนดวันที่ปัจจุบัน
+            const today = new Date();
+            today.setHours(today.getHours() + 7); // ปรับเวลาเป็น GMT+7 (Time Zone ไทย)
+            const formattedToday = today.toISOString().split('T')[0];
 
-    // กำหนดวันที่เริ่มต้นให้เป็นวันที่ 1 ของเดือนปัจจุบันโดยตั้งให้ Time Zone เป็น GMT+7
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    firstDayOfMonth.setHours(firstDayOfMonth.getHours() + 7); // ปรับเวลาเป็น GMT+7
-    const formattedFirstDayOfMonth = firstDayOfMonth.toISOString().split('T')[0];
+            // กำหนดวันที่เริ่มต้นให้เป็นวันที่ 1 ของเดือนปัจจุบัน
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            firstDayOfMonth.setHours(firstDayOfMonth.getHours() + 7); // ปรับเวลาเป็น GMT+7
+            const formattedFirstDayOfMonth = firstDayOfMonth.toISOString().split('T')[0];
 
-    // Debugging console logs
-    console.log("Setting Start Date to First Day of Month:", formattedFirstDayOfMonth);
-    console.log("Setting End Date to Today:", formattedToday);
+            // ตั้งค่าให้ช่องวันที่เริ่มต้นและวันที่สิ้นสุด
+            startDateInput.value = formattedFirstDayOfMonth;
+            endDateInput.value = formattedToday;
 
-    // ตั้งค่าให้ช่องวันที่เริ่มต้นและวันที่สิ้นสุด
-    startDateInput.value = formattedFirstDayOfMonth;
-    endDateInput.value = formattedToday;
+            // กำหนดวันที่สูงสุดเป็นวันที่ปัจจุบัน
+            startDateInput.max = formattedToday;
+            endDateInput.max = formattedToday;
 
-    // กำหนดวันที่สูงสุดเป็นวันที่ปัจจุบัน
-    startDateInput.max = formattedToday;
-    endDateInput.max = formattedToday;
+            // เรียกใช้ฟังก์ชันโหลดข้อมูลอัตโนมัติ
+            fetchAttendanceData();
+            fetchTotalCounts();
 
-    // เรียก fetchAttendanceData อัตโนมัติเมื่อโหลดหน้า
-    fetchAttendanceData();
+            // ทำให้ fetchAttendanceData ทำงานอัตโนมัติเมื่อมีการเปลี่ยนแปลงวันที่เริ่มต้นและวันที่สิ้นสุด
+            startDateInput.addEventListener('change', fetchAttendanceData);
+            endDateInput.addEventListener('change', fetchAttendanceData);
+        });
 
-    // ตรวจสอบค่าใน Console
-    console.log("Final Start Date Value:", startDateInput.value);
-    console.log("Final End Date Value:", endDateInput.value);
+        // เรียกฟังก์ชันเมื่อหน้าโหลดเสร็จ
+        window.onload = function() {
+            fetchAttendanceData();
+            fetchTotalCounts();
+        };
 
-    // ทำให้ fetchAttendanceData ทำงานอัตโนมัติเมื่อมีการเปลี่ยนแปลงวันที่เริ่มต้นและวันที่สิ้นสุด
-    startDateInput.addEventListener('change', fetchAttendanceData);
-    endDateInput.addEventListener('change', fetchAttendanceData);
-});
+        // เรียกฟังก์ชันใหม่เมื่อหน้าจอถูกปรับขนาด (เช่น การเปลี่ยนจากแนวนอนเป็นแนวตั้ง)
+        window.addEventListener('resize', function() {
+            if (window.innerWidth < 768) {
+                fetchAttendanceData();
+                fetchTotalCounts();
+            }
+        });
 
-$(document).ready(function() {
-    // Fetch initial data for dropdowns
-    fetchDropdownData();
+        // เรียกฟังก์ชันเมื่อมีการเชื่อมต่ออินเทอร์เน็ตกลับมา
+        window.addEventListener('online', function() {
+            fetchAttendanceData();
+            fetchTotalCounts();
+        });
 
-    // Fetch total counts data on page load
-    fetchTotalCounts();
 
-    // Update Room and Student options based on Grade and Room selections
-    $('#grade').change(function() {
-        const gradeId = $(this).val();
-        fetchRoomsByGrade(gradeId);
-        fetchStudentsByGradeAndRoom(gradeId, ''); // ส่งค่า roomId ว่างเพื่อให้แสดงนักเรียนทั้งหมดในชั้นที่เลือก
-        fetchAttendanceData(); // Refresh attendance data with new grade selection
-    });
+        $(document).ready(function() {
+            // Fetch initial data for dropdowns
+            fetchDropdownData();
 
-    $('#room').change(function() {
-        const roomId = $(this).val();
-        const gradeId = $('#grade').val();
-        fetchStudentsByGradeAndRoom(gradeId, roomId);
-        fetchAttendanceData(); // Refresh attendance data with new room selection
-    });
+            // Fetch total counts data on page load
+            fetchTotalCounts();
 
-    $('#student').change(function() {
-        fetchAttendanceData(); // Refresh attendance data with new student selection
-    });
-});
-
-function fetchDropdownData() {
-    $.ajax({
-        url: 'backend/fetch_dropdown_options.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            $('#grade').empty().append('<option value="">ทั้งหมด</option>');
-            $.each(data.grades, function(index, grade) {
-                $('#grade').append('<option value="' + grade.id + '">' + grade.grade_level + '</option>');
+            // Update Room and Student options based on Grade and Room selections
+            $('#grade').change(function() {
+                const gradeId = $(this).val();
+                fetchRoomsByGrade(gradeId);
+                fetchStudentsByGradeAndRoom(gradeId, ''); // ส่งค่า roomId ว่างเพื่อให้แสดงนักเรียนทั้งหมดในชั้นที่เลือก
+                fetchAttendanceData(); // Refresh attendance data with new grade selection
             });
 
-            // แสดงห้องและนักเรียนทั้งหมดในตอนแรก
-            $('#room').empty().append('<option value="">ทั้งหมด</option>');
-            $.each(data.rooms, function(index, room) {
-                $('#room').append('<option value="' + room.id + '">' + room.name + '</option>');
+            $('#room').change(function() {
+                const roomId = $(this).val();
+                const gradeId = $('#grade').val();
+                fetchStudentsByGradeAndRoom(gradeId, roomId);
+                fetchAttendanceData(); // Refresh attendance data with new room selection
             });
 
-            $('#student').empty().append('<option value="">ทั้งหมด</option>');
-            $.each(data.students, function(index, student) {
-                $('#student').append('<option value="' + student.id + '">' + student.prefix + ' ' + student.name + ' ' + student.surname + '</option>');
+            $('#student').change(function() {
+                fetchAttendanceData(); // Refresh attendance data with new student selection
             });
-        },
-        error: function() {
-            Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถดึงข้อมูลได้", "error");
+        });
+
+        function fetchDropdownData() {
+            $.ajax({
+                url: 'backend/fetch_dropdown_options.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    $('#grade').empty().append('<option value="">ทั้งหมด</option>');
+                    $.each(data.grades, function(index, grade) {
+                        $('#grade').append('<option value="' + grade.id + '">' + grade.grade_level + '</option>');
+                    });
+
+                    // แสดงห้องและนักเรียนทั้งหมดในตอนแรก
+                    $('#room').empty().append('<option value="">ทั้งหมด</option>');
+                    $.each(data.rooms, function(index, room) {
+                        $('#room').append('<option value="' + room.id + '">' + room.name + '</option>');
+                    });
+
+                    $('#student').empty().append('<option value="">ทั้งหมด</option>');
+                    $.each(data.students, function(index, student) {
+                        $('#student').append('<option value="' + student.id + '">' + student.prefix + ' ' + student.name + ' ' + student.surname + '</option>');
+                    });
+                },
+                error: function() {
+                    Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถดึงข้อมูลได้", "error");
+                }
+            });
         }
-    });
-}
 
-function fetchRoomsByGrade(gradeId) {
+        function fetchRoomsByGrade(gradeId) {
     $.ajax({
         url: 'backend/fetch_rooms.php',
         type: 'POST',
@@ -256,62 +270,64 @@ function fetchRoomsByGrade(gradeId) {
             $.each(data.rooms, function(index, room) {
                 $('#room').append('<option value="' + room.id + '">' + room.name + '</option>');
             });
+        },
+        error: function() {
+            Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถดึงข้อมูลห้องเรียนได้", "error");
         }
     });
 }
 
-function fetchStudentsByGradeAndRoom(gradeId, roomId) {
-    $.ajax({
-        url: 'backend/fetch_students.php',
-        type: 'POST',
-        data: {
-            grade_id: gradeId,
-            room_id: roomId
-        },
-        dataType: 'json',
-        success: function(data) {
-            $('#student').empty().append('<option value="">ทั้งหมด</option>');
-            $.each(data.students, function(index, student) {
-                $('#student').append('<option value="' + student.id + '">' + student.prefix + ' ' + student.name + ' ' + student.surname + '</option>');
+        function fetchStudentsByGradeAndRoom(gradeId, roomId) {
+            $.ajax({
+                url: 'backend/fetch_students.php',
+                type: 'POST',
+                data: {
+                    grade_id: gradeId,
+                    room_id: roomId
+                },
+                dataType: 'json',
+                success: function(data) {
+                    $('#student').empty().append('<option value="">ทั้งหมด</option>');
+                    $.each(data.students, function(index, student) {
+                        $('#student').append('<option value="' + student.id + '">' + student.prefix + ' ' + student.name + ' ' + student.surname + '</option>');
+                    });
+                }
             });
         }
-    });
-}
 
 
-function fetchAttendanceData() {
-    const formData = $('#filterForm').serialize();
+        function fetchAttendanceData() {
+            const formData = $('#filterForm').serialize();
 
-    $.ajax({
-        url: 'backend/fetch_attendance_data.php',
-        type: 'POST',
-        data: formData,
-        dataType: 'json',
-        success: function(data) {
-            $('#attendanceInCount').text(data.totalIn);
-            $('#attendanceOutCount').text(data.totalOut);
-        },
-        error: function() {
-            Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถดึงข้อมูลได้", "error");
+            $.ajax({
+                url: 'backend/fetch_attendance_data.php',
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(data) {
+                    $('#attendanceInCount').text(data.totalIn);
+                    $('#attendanceOutCount').text(data.totalOut);
+                },
+                error: function() {
+                    Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถดึงข้อมูลได้", "error");
+                }
+            });
         }
-    });
-}
 
-// ฟังก์ชันดึงข้อมูลจำนวนนักเรียน ครู และแอดมิน
-function fetchTotalCounts() {
-    $.ajax({
-        url: 'backend/fetch_counts.php', // ตรวจสอบว่าไฟล์นี้ใช้ชื่อถูกต้องตามที่คุณเก็บไว้
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            $('#totalAdminCount').text(data.totalAdmins);
-            $('#totalTeacherCount').text(data.totalTeachers);
-            $('#totalStudentCount').text(data.totalStudents);
-        },
-        error: function() {
-            Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถดึงข้อมูลจำนวนนักเรียน ครู และแอดมินได้", "error");
+        // ฟังก์ชันดึงข้อมูลจำนวนนักเรียน ครู และแอดมิน
+        function fetchTotalCounts() {
+            $.ajax({
+                url: 'backend/fetch_counts.php', // ตรวจสอบว่าไฟล์นี้ใช้ชื่อถูกต้องตามที่คุณเก็บไว้
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    $('#totalAdminCount').text(data.totalAdmins);
+                    $('#totalTeacherCount').text(data.totalTeachers);
+                    $('#totalStudentCount').text(data.totalStudents);
+                },
+                error: function() {
+                    Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถดึงข้อมูลจำนวนนักเรียน ครู และแอดมินได้", "error");
+                }
+            });
         }
-    });
-}
-
     </script>
