@@ -1,17 +1,17 @@
 <?php
 session_start();
 include('config/ConnectDB.php');
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-    $redirectUrl = "admin/index.php";
+// if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+//     $redirectUrl = "admin/index.php?id=dashboard";
 
-    echo json_encode([
-        'title' => 'เกิดข้อผิดพลาด!',
-        'message' => 'คุณได้เข้าสู่ระบบแล้ว!',
-        'type' => 'warning',
-        'redirectUrl' => $redirectUrl
-    ]);
-    exit();
-}
+//     echo json_encode([
+//         'title' => 'เกิดข้อผิดพลาด!',
+//         'message' => 'คุณได้เข้าสู่ระบบแล้ว!',
+//         'type' => 'warning',
+//         'redirectUrl' => $redirectUrl
+//     ]);
+//     exit();
+// }
 
 if (isset($_POST['username']) && isset($_POST['password'])) {
 
