@@ -45,9 +45,9 @@ if (empty($_SESSION['username'])) {
 
             $swcase = @$_GET['id'];
             switch ($swcase) {
-                case "dashboard":
-                    include'index.php';
-                    break;
+                // case "dashboard":
+                //     include'index.php';
+                //     break;
                 case "admin":
                     include 'header.php';
                     include 'admin.php';
@@ -55,6 +55,10 @@ if (empty($_SESSION['username'])) {
                 case "grade_level":
                     include 'header.php';
                     include 'grade_level.php';
+                    break;
+                case "up_grade_level":
+                    include 'header.php';
+                    include 'up_grade_level.php';
                     break;
                 case "rooms":
                     include 'header.php';
@@ -76,13 +80,13 @@ if (empty($_SESSION['username'])) {
                     include 'header.php';
                     include 'history_check_inout.php';
                     break;
-                case "manual_check_inout":
-                    include 'header.php';
-                    include 'manual_check_inout.php';
-                    break;
+                // case "manual_check_inout":
+                //     include 'header.php';
+                //     include 'manual_check_inout.php';
+                //     break;
                 default:
                     include 'header.php';
-                    include 'dashboard.php';
+                    include 'check_name_student.php';
             }
 
 
