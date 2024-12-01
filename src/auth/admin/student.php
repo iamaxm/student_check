@@ -56,7 +56,9 @@ if (!$student_result) {
                     <button type="button" class="btn btn-outline-success m-1" data-bs-toggle="modal" data-bs-target="#addStudentModal">
                         เพิ่มนักเรียน
                     </button>
-
+                    <button type="button" class="btn btn-outline-info m-1" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                        นำเข้าข้อมูลนักเรียน (Excel)
+                    </button>
                     <!-- Students Table -->
                     <div class="table-responsive">
                         <table class="table text-nowrap mb-0 align-middle">
@@ -232,8 +234,6 @@ if (!$student_result) {
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id_admin" value="<?php echo $current_admin_id; ?>">
-
-                    <!-- Prefix Field -->
                     <div class="mb-3">
                         <label for="prefix" class="form-label">คำนำหน้าชื่อ</label>
                         <select class="form-select" id="prefix" name="prefix" required>
@@ -244,8 +244,6 @@ if (!$student_result) {
                             <option value="เด็กหญิง">เด็กหญิง</option>
                         </select>
                     </div>
-
-                    <!-- Name and Surname Fields -->
                     <div class="mb-3">
                         <label for="studentName" class="form-label">ชื่อ</label>
                         <input type="text" class="form-control" id="studentName" name="name" required>
@@ -254,31 +252,22 @@ if (!$student_result) {
                         <label for="studentSurname" class="form-label">นามสกุล</label>
                         <input type="text" class="form-control" id="studentSurname" name="surname" required>
                     </div>
-
-                    <!-- Grade Level Field -->
                     <div class="mb-3">
                         <label for="id_grade" class="form-label">ชั้นเรียน</label>
-                        <select class="form-select" id="id_grade" name="id_grade" required onchange="fetchRoomAndTeacher(this.value)">
+                        <select class="form-select" id="id_grade" name="id_grade" required>
                             <option selected="" disabled hidden>เลือกชั้นเรียน</option>
                             <?php foreach ($grade_result as $grade) : ?>
                                 <option value="<?php echo $grade['id']; ?>"><?php echo $grade['grade_level']; ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-
-                    <!-- Room and Teacher Fields (Populated by JavaScript) -->
                     <div class="mb-3">
                         <label for="id_room" class="form-label">ห้องเรียน</label>
-                        <select class="form-select" id="id_room" name="id_room" required onchange="fetchTeacherByRoom(this.value)">
-                            <option selected="" disabled hidden>เลือกห้องเรียน</option>
-                        </select>
+                        <select class="form-select" id="id_room" name="id_room" required></select>
                     </div>
-
                     <div class="mb-3">
                         <label for="id_teacher" class="form-label">ครูที่ดูแล</label>
-                        <select class="form-select" id="id_teacher" name="id_teacher" required>
-                            <option selected="" disabled hidden>เลือกครูที่ดูแล</option>
-                        </select>
+                        <select class="form-select" id="id_teacher" name="id_teacher" required></select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -290,8 +279,50 @@ if (!$student_result) {
     </div>
 </div>
 
+<!-- Import Excel Modal -->
+<div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="importExcelForm" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">นำเข้าข้อมูลนักเรียน (Excel)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id_admin" value="<?php echo $current_admin_id; ?>">
+                    <div class="mb-3">
+                        <label for="excelFile" class="form-label">เลือกไฟล์ Excel</label>
+                        <input type="file" class="form-control" id="excelFile" name="excelFile" accept=".xls, .xlsx" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="importGrade" class="form-label">ชั้นเรียน</label>
+                        <select class="form-select" id="importGrade" name="id_grade" required>
+                            <option selected="" disabled hidden>เลือกชั้นเรียน</option>
+                            <?php foreach ($grade_result as $grade) : ?>
+                                <option value="<?php echo $grade['id']; ?>"><?php echo $grade['grade_level']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_room" class="form-label">ห้องเรียน</label>
+                        <select class="form-select" id="importRoom" name="id_room" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_teacher" class="form-label">ครูที่ดูแล</label>
+                        <select class="form-select" id="importTeacher" name="id_teacher" required></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                    <button type="submit" class="btn btn-primary">นำเข้า</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    function fetchRoomAndTeacher(gradeId) {
+    function fetchRoomAndTeacher(gradeId, roomSelector, teacherSelector) {
         $.ajax({
             url: 'backend/fetch_room_teacher.php',
             type: 'POST',
@@ -300,25 +331,31 @@ if (!$student_result) {
             },
             dataType: 'json',
             success: function(response) {
-                // Clear existing options
-                $('#id_room').empty().append('<option selected disabled hidden>เลือกห้องเรียน</option>');
-                $('#id_teacher').empty().append('<option selected disabled hidden>เลือกครูที่ดูแล</option>');
-
-                // Populate rooms
+                $(roomSelector).empty().append('<option selected disabled hidden>เลือกห้องเรียน</option>');
+                $(teacherSelector).empty().append('<option selected disabled hidden>เลือกครูที่ดูแล</option>');
                 $.each(response.rooms, function(index, room) {
-                    $('#id_room').append('<option value="' + room.id + '">' + room.name + '</option>');
+                    $(roomSelector).append('<option value="' + room.id + '">' + room.name + '</option>');
                 });
-
-                // Populate teachers for the grade level initially
                 $.each(response.teachers, function(index, teacher) {
-                    $('#id_teacher').append('<option value="' + teacher.id + '">' + teacher.name + ' ' + teacher.surname + '</option>');
+                    $(teacherSelector).append('<option value="' + teacher.id + '">' + teacher.name + ' ' + teacher.surname + '</option>');
                 });
             },
             error: function(xhr, status, error) {
-                console.log("AJAX Error: " + error);
+                console.error("AJAX Error:", error);
             }
         });
     }
+
+    // Add Student Modal
+    $('#id_grade').change(function() {
+        fetchRoomAndTeacher($(this).val(), '#id_room', '#id_teacher');
+    });
+
+    // Import Excel Modal
+    $('#importGrade').change(function() {
+        fetchRoomAndTeacher($(this).val(), '#importRoom', '#importTeacher');
+    });
+
 
     // Fetch teachers by room selection
     function fetchTeacherByRoom(roomId) {
@@ -503,4 +540,57 @@ if (!$student_result) {
             }
         });
     });
+
+    // Handle Import Excel Form Submission
+    $('#importExcelForm').on('submit', function(e) {
+    e.preventDefault();
+    let formData = new FormData(this);
+    $.ajax({
+        url: '../excel/import_excel.php',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            try {
+                const res = JSON.parse(response); // แปลง response เป็น JSON Object
+                if (res.type === 'success') {
+                    Swal.fire({
+                        title: "สำเร็จ!",
+                        text: res.message,
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } else if (res.type === 'error' || res.type === 'warning') {
+                    Swal.fire({
+                        title: "เกิดข้อผิดพลาด!",
+                        text: res.message,
+                        icon: res.type === 'error' ? "error" : "warning",
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: "ผิดพลาด!",
+                    text: "เกิดข้อผิดพลาดในการประมวลผลข้อมูล",
+                    icon: "error",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        },
+        error: function() {
+            Swal.fire({
+                title: "ผิดพลาด!",
+                text: "ไม่สามารถนำเข้าข้อมูลได้",
+                icon: "error",
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+    });
+});
+
 </script>
