@@ -98,6 +98,13 @@ while ($row = $attendance_result->fetch_assoc()) {
                 <div class="card w-100">
                     <center>
                         <h1 class="card-title fw-semibold mb-4" style="margin-top: 2rem; font-size:25px">รายงานการเช็คชื่อ (รายวัน)</h1>
+                        <form method="GET" action="../excel/export_attendance_day.php">
+                            <input type="hidden" name="date" value="<?php echo $selected_date; ?>">
+                            <input type="hidden" name="grade_id" value="<?php echo $selected_grade; ?>">
+                            <input type="hidden" name="room_id" value="<?php echo $selected_room; ?>">
+                            <button type="submit" class="btn btn-success">ส่งออก Excel</button>
+                        </form>
+
                     </center>
                     <div class="card-body p-4">
                         <form method="POST" class="mb-3">

@@ -115,6 +115,15 @@ while ($row = $check_result->fetch_assoc()) {
                 <div class="card w-100">
                     <center>
                         <h1 class="card-title fw-semibold mb-4" style="margin-top: 2rem; font-size:25px">รายงานการเช็คชื่อรายเดือน</h1>
+                        <form method="GET" action="../excel/export_attendance_months.php">
+                            <input type="hidden" name="month" value="<?php echo $selected_month; ?>">
+                            <input type="hidden" name="grade_id" value="<?php echo $selected_grade; ?>">
+                            <input type="hidden" name="room_id" value="<?php echo $selected_room; ?>">
+                            <input type="hidden" name="check_type" value="<?php echo isset($selected_check_type) ? $selected_check_type : 'check_in'; ?>"> <!-- เพิ่มประเภทการเช็ค -->
+                            <button type="submit" class="btn btn-success">ส่งออก Excel</button>
+                        </form>
+
+
                     </center>
                     <div class="card-body p-4">
                         <form method="POST" class="mb-3">
