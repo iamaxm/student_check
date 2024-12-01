@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 15, 2024 at 12:27 PM
+-- Generation Time: Nov 21, 2024 at 04:47 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -44,6 +44,28 @@ INSERT INTO `admin` (`id`, `username`, `password`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `check_in`
+--
+
+CREATE TABLE `check_in` (
+  `id` int(11) NOT NULL,
+  `id_student` int(11) NOT NULL,
+  `in_at` timestamp NULL DEFAULT NULL,
+  `out_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `check_in`
+--
+
+INSERT INTO `check_in` (`id`, `id_student`, `in_at`, `out_at`, `created_at`) VALUES
+(5, 1, '2024-11-18 01:00:00', '2024-11-18 10:00:00', '2024-11-18 05:48:54'),
+(7, 1, '2024-11-21 06:44:26', NULL, '2024-11-21 06:44:04');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `check_time_settings`
 --
 
@@ -60,7 +82,7 @@ CREATE TABLE `check_time_settings` (
 --
 
 INSERT INTO `check_time_settings` (`id`, `check_in_start`, `check_in_end`, `check_out_start`, `check_out_end`) VALUES
-(1, '18:00:00', '22:20:00', '22:30:00', '22:50:00');
+(1, '06:00:00', '08:00:00', '16:00:00', '17:00:00');
 
 -- --------------------------------------------------------
 
@@ -137,7 +159,7 @@ CREATE TABLE `student` (
 --
 
 INSERT INTO `student` (`id`, `prefix`, `name`, `surname`, `id_finger`, `id_room`, `id_teacher`, `id_admin`, `id_grade`, `created_at`) VALUES
-(1, 'นางสาว', 'อัญชลี', 'สุทธิรัตน์', NULL, 1, 1, 1, 1, '2024-11-14 05:24:33'),
+(1, 'นางสาว', 'อัญชลี', 'สุทธิรัตน์', NULL, 1, 1, 1, 1, '2024-11-18 15:35:06'),
 (2, 'นาย', 'สรอรรถ', 'จันทร์นนท์', NULL, 4, 4, 1, 2, '2024-11-14 05:26:28');
 
 -- --------------------------------------------------------
@@ -165,29 +187,6 @@ INSERT INTO `teacher` (`id`, `name`, `surname`, `id_room`, `id_admin`, `created_
 (3, 'อำนวย', 'มานะ', 3, 1, '2024-11-14 05:22:57'),
 (4, 'สมจิต', 'ใจดำ', 4, 1, '2024-11-14 05:23:22');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `time_inout`
---
-
-CREATE TABLE `time_inout` (
-  `id` int(11) NOT NULL,
-  `id_student` int(11) DEFAULT NULL,
-  `status` enum('pending','in','out') DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `time_inout`
---
-
-INSERT INTO `time_inout` (`id`, `id_student`, `status`, `created_at`) VALUES
-(1, 1, 'out', '2024-11-14 15:31:56'),
-(2, 2, 'out', '2024-11-14 15:32:38'),
-(3, 1, 'in', '2024-11-15 11:22:20'),
-(4, 2, 'in', '2024-11-15 11:22:17');
-
 --
 -- Indexes for dumped tables
 --
@@ -197,6 +196,13 @@ INSERT INTO `time_inout` (`id`, `id_student`, `status`, `created_at`) VALUES
 --
 ALTER TABLE `admin`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `check_in`
+--
+ALTER TABLE `check_in`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `foreign key id_student` (`id_student`);
 
 --
 -- Indexes for table `check_time_settings`
@@ -236,13 +242,6 @@ ALTER TABLE `teacher`
   ADD KEY `id_admin` (`id_admin`);
 
 --
--- Indexes for table `time_inout`
---
-ALTER TABLE `time_inout`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_student` (`id_student`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -251,6 +250,12 @@ ALTER TABLE `time_inout`
 --
 ALTER TABLE `admin`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+
+--
+-- AUTO_INCREMENT for table `check_in`
+--
+ALTER TABLE `check_in`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `check_time_settings`
@@ -283,14 +288,14 @@ ALTER TABLE `teacher`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `time_inout`
---
-ALTER TABLE `time_inout`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `check_in`
+--
+ALTER TABLE `check_in`
+  ADD CONSTRAINT `foreign key id_student` FOREIGN KEY (`id_student`) REFERENCES `student` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `room`
@@ -313,12 +318,6 @@ ALTER TABLE `student`
 ALTER TABLE `teacher`
   ADD CONSTRAINT `teacher_ibfk_1` FOREIGN KEY (`id_room`) REFERENCES `room` (`id`),
   ADD CONSTRAINT `teacher_ibfk_2` FOREIGN KEY (`id_admin`) REFERENCES `admin` (`id`);
-
---
--- Constraints for table `time_inout`
---
-ALTER TABLE `time_inout`
-  ADD CONSTRAINT `time_inout_ibfk_1` FOREIGN KEY (`id_student`) REFERENCES `student` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

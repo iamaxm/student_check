@@ -76,9 +76,17 @@ if (empty($_SESSION['username'])) {
                     include 'header.php';
                     include 'check_name_student.php';
                     break;
-                case "history_check_inout":
+                case "check_inout_months":
                     include 'header.php';
-                    include 'history_check_inout.php';
+                    include 'check_inout_months.php';
+                    break;
+                case "check_inout_day":
+                    include 'header.php';
+                    include 'check_inout_day.php';
+                    break;
+                case "clear_student":
+                    include 'header.php';
+                    include 'clear_student.php';
                     break;
                 // case "manual_check_inout":
                 //     include 'header.php';
@@ -99,9 +107,9 @@ if (empty($_SESSION['username'])) {
     <script src="../../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../../assets/js/sidebarmenu.js"></script>
     <script src="../../assets/js/app.min.js"></script>
-    <script src="../../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+    <!-- <script src="../../assets/libs/apexcharts/dist/apexcharts.min.js"></script> -->
     <script src="../../assets/libs/simplebar/dist/simplebar.js"></script>
-    <script src="../../assets/js/dashboard.js"></script>
+    <!-- <script src="../../assets/js/dashboard.js"></script> -->
 </body>
 
 </html>

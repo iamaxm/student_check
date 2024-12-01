@@ -92,12 +92,12 @@ while ($row = $check_result->fetch_assoc()) {
         }
 
         .icon-check {
-            color: green;
+            color: black;
             font-weight: bold;
         }
 
         .icon-late {
-            color: orange;
+            color: black;
             font-weight: bold;
         }
 
@@ -114,7 +114,7 @@ while ($row = $check_result->fetch_assoc()) {
             <div class="col">
                 <div class="card w-100">
                     <center>
-                        <h1 class="card-title fw-semibold mb-4" style="margin-top: 2rem; font-size:25px">รายงานการเช็คชื่อ</h1>
+                        <h1 class="card-title fw-semibold mb-4" style="margin-top: 2rem; font-size:25px">รายงานการเช็คชื่อรายเดือน</h1>
                     </center>
                     <div class="card-body p-4">
                         <form method="POST" class="mb-3">
@@ -153,15 +153,16 @@ while ($row = $check_result->fetch_assoc()) {
                                             'พฤศจิกายน',
                                             'ธันวาคม'
                                         ];
-                                        $selected_year_ce = $selected_year - 543;
+                                        $selected_year_ce = $selected_year - 543; // แปลง พ.ศ. เป็น ค.ศ.
                                         for ($month = 1; $month <= 12; $month++) {
                                             $month_option = $selected_year_ce . "-" . str_pad($month, 2, "0", STR_PAD_LEFT);
                                             $selected = ($selected_month == $month_option) ? 'selected' : '';
-                                            echo "<option value='$month_option' $selected>" . $thai_months[$month - 1] . " $selected_year</option>";
+                                            echo "<option value='$month_option' $selected>" . $thai_months[$month - 1] . "</option>";
                                         }
                                         ?>
                                     </select>
                                 </div>
+
 
                                 <!-- เลือกชั้นเรียน -->
                                 <div class="col-md-3">
@@ -227,7 +228,7 @@ while ($row = $check_result->fetch_assoc()) {
                                                 } else {
                                                     $check_time = $attendance[$student['id']][$current_date] ?? null;
                                                     $status = "absent";
-                                                    $icon_html = "<td class='icon-cross' data-student-id='{$student['id']}' data-date='{$current_date}' data-status='absent'>✘</td>";
+                                                    $icon_html = "<td class='icon-cross' data-student-id='{$student['id']}' data-date='{$current_date}' data-status='absent'>ข</td>";
 
                                                     if ($selected_check_type == 'check_in') {
                                                         if ($check_time) {
@@ -237,9 +238,7 @@ while ($row = $check_result->fetch_assoc()) {
                                                             } else {
                                                                 $status = "late";
                                                                 $icon_html = "<td class='icon-late' data-student-id='{$student['id']}' data-date='{$current_date}' data-status='late'>
-                                                                    <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='orange' class='bi bi-circle' viewBox='0 0 16 16'>
-                                                                        <path d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16'/>
-                                                                    </svg>
+                                                                    ส
                                                                 </td>";
                                                             }
                                                         }
