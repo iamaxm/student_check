@@ -79,6 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_check'])) {
         flex-direction: row;
         align-items: center;
     }
+
+    #beepsound {
+        display: none;
+    }
 </style>
 
 <div class="container-fluid">
@@ -108,8 +112,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_check'])) {
                                         <input type="number" class="form-control" id="studentIdInput" name="studentIdInput" min="1" placeholder="กรอก ID นักเรียน" required>
                                     </div>
                                     <button type="button" class="btn btn-outline-success m-1" onclick="toggleCheckInOut()">เช็คชื่อ</button>
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qrScannerModal">
+                                        เปิดกล้องเพื่อสแกน QR Code
+                                    </button>
+                                    <audio id="beepsound" controls>
+                                        <source src="../qrcode-scanner/sound/scanner-beeps-barcode.mp3" type="audio/mpeg">
+                                        Your browser does not support the audio tag.
+                                    </audio>
                                 </div>
                             </div>
+
 
                             <!-- แสดงข้อมูลการเช็คชื่อ -->
                             <div class="table-responsive mt-4">
@@ -193,6 +205,211 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_check'])) {
 </div>
 </div>
 </div>
+<!-- <div class="modal fade" id="qrScannerModal" tabindex="-1" role="dialog" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrScannerModalLabel">สแกน QR Code</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="wrap-qrcode-scanner">
+                    <h1>QRCode Scanner</h1>
+                    <div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div>
+                    <canvas id="canvas" hidden></canvas>
+                    <div id="output" hidden>
+                        <div id="outputMessage">No QR code detected.</div>
+                        <div hidden><b>Data:</b> <span id="outputData"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<div class="modal fade" id="qrScannerModal" tabindex="-1" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrScannerModalLabel">สแกน QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="wrap-qrcode-scanner">
+                    <div id="loadingMessage">🎥 กำลังโหลดกล้อง...</div>
+                    <canvas id="canvas" class="scanner-canvas"></canvas>
+                    <div id="output" hidden>
+                        <div id="outputMessage">ยังไม่พบ QR Code</div>
+                        <div><b>ข้อมูล:</b> <span id="outputData"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal-body {
+        text-align: center;
+    }
+
+    .scanner-canvas {
+        width: 100%; /* กำหนดให้ครอบคลุมพื้นที่ในโมดัล */
+        max-width: 640px; /* กำหนดขนาดสูงสุดของกล้อง */
+        height: auto; /* ให้ปรับความสูงอัตโนมัติ */
+        margin: 0 auto; /* จัดให้อยู่กึ่งกลาง */
+    }
+
+    #loadingMessage {
+        font-size: 16px;
+        color: #999;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+</style>
+
+<script src="../qrcode-scanner/lib/jsqr/jsQR.js"></script>
+<script>
+    let video;
+    let canvasElement = document.getElementById("canvas");
+    let canvas = canvasElement.getContext("2d");
+    var beepsound = document.getElementById("beepsound");
+    let loadingMessage = document.getElementById("loadingMessage");
+    let outputContainer = document.getElementById("output");
+    let outputMessage = document.getElementById("outputMessage");
+    let outputData = document.getElementById("outputData");
+    let animationFrameId;
+
+    function startVideoStream() {
+        video = document.createElement("video");
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "environment",
+                width: {
+                    ideal: 1280
+                },
+                height: {
+                    ideal: 720
+                },
+            }
+        }).then(function(stream) {
+            video.srcObject = stream;
+            video.setAttribute("playsinline", true); // Prevent fullscreen on iOS
+            video.play();
+            tick(); // Start rendering video to canvas
+        }).catch(function(error) {
+            console.error("Error accessing the camera: ", error);
+            loadingMessage.innerText = "🎥 ไม่สามารถเข้าถึงกล้องได้";
+        });
+    }
+
+    function stopVideoStream() {
+        if (video && video.srcObject) {
+            let stream = video.srcObject;
+            let tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+            video.srcObject = null;
+        }
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId); // Stop rendering
+        }
+    }
+
+    function playBeepSound() {
+        if (beepsound) {
+            // Ensure the sound starts from the beginning
+            beepsound.currentTime = 0;
+
+            // Play the sound
+            beepsound.play().catch(error => {
+                console.error("Error playing beep sound:", error);
+            });
+        }
+    }
+
+    let canScan = true; // ตัวแปรควบคุมสถานะการสแกน
+
+function tick() {
+    animationFrameId = requestAnimationFrame(tick);
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        loadingMessage.hidden = true;
+        canvasElement.hidden = false;
+
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+
+        const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+        });
+
+        if (code && canScan) { // ตรวจสอบสถานะการสแกน
+            canScan = false; // ล็อกการสแกน
+            playBeepSound();
+            outputMessage.hidden = true;
+            outputData.parentElement.hidden = false;
+            outputData.innerText = code.data;
+
+            let lines = code.data.split('\n');
+            let jsonObject = {};
+
+            lines.forEach(line => {
+                let [key, value] = line.split(':').map(item => item.trim());
+                jsonObject[key] = value;
+            });
+
+            let jsonString = JSON.stringify(jsonObject, null, 2);
+
+            const currentHour = new Date().getHours();
+            const currentMinutes = new Date().getMinutes() / 100;
+            const currentTimeDecimal = currentHour + currentMinutes;
+
+            // ส่งข้อมูลไปที่ backend
+            $.ajax({
+                url: 'backend/bn_check_in_out.php',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    student_id: jsonObject.student_id,
+                    hour: currentTimeDecimal // ส่งค่าเวลาไปที่ backend
+                },
+                success: function(response) {
+                    const messageType = response.message.includes("สำเร็จ") ? "success" : "error";
+                    swal({
+                        title: messageType === "success" ? "สำเร็จ!" : "เกิดข้อผิดพลาด!",
+                        text: response.message,
+                        type: messageType,
+                        timer: 2000,
+                        showConfirmButton: true
+                    });
+                },
+                error: function() {
+                    swal("เกิดข้อผิดพลาด!", "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้", "error");
+                }
+            });
+
+            // ปลดล็อกการสแกนหลังจาก 2 วินาที
+            setTimeout(() => {
+                canScan = true; // ปลดล็อกการสแกน
+            }, 2000);
+        } else {
+            outputMessage.hidden = false;
+            outputData.parentElement.hidden = true;
+        }
+    }
+}
+
+
+
+    // Attach event listeners for modal show/hide
+    const qrScannerModal = document.getElementById("qrScannerModal");
+    qrScannerModal.addEventListener("shown.bs.modal", startVideoStream);
+    qrScannerModal.addEventListener("hidden.bs.modal", stopVideoStream);
+</script>
+
 
 <script>
     $(document).ready(function() {
