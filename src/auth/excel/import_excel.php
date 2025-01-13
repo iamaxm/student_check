@@ -3,7 +3,7 @@ require 'vendor/autoload.php'; // โหลด PHPSpreadsheet
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    @session_start(); 
+    @session_start();
     include '../config/ConnectDB.php';
 
     date_default_timezone_set('Asia/Bangkok');
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file = $_FILES['excelFile']['tmp_name'];
 
         try {
-            $spreadsheet = IOFactory::load($file); 
+            $spreadsheet = IOFactory::load($file);
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray();
 
@@ -31,8 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 exit;
             }
 
+            $duplicates = []; // เก็บข้อมูลซ้ำ
             foreach ($rows as $key => $row) {
-                if ($key === 0) continue; 
+                if ($key === 0) continue;
 
                 $prefix = isset($row[0]) ? trim(mysqli_real_escape_string($conn, $row[0])) : null;
                 $name = isset($row[1]) ? trim(mysqli_real_escape_string($conn, $row[1])) : null;
@@ -50,16 +51,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt_check->store_result();
 
                 if ($stmt_check->num_rows > 0) {
-                    echo json_encode([
-                        'type' => 'error',
-                        'message' => "ชื่อนักเรียน '$name $surname' มีอยู่แล้วในระบบ (แถวที่ " . ($key + 1) . ")"
-                    ]);
-                    $stmt_check->close();
-                    exit;
+                    $duplicates[] = "แถวที่ " . ($key + 1) . " ชื่อนักเรียน '$name $surname'";
                 }
                 $stmt_check->close();
+            }
 
-                // เพิ่มข้อมูลใหม่
+            if (!empty($duplicates)) {
+                echo json_encode([
+                    'type' => 'error',
+                    'message' => 'พบข้อมูลซ้ำ: ' . implode(', ', $duplicates)
+                ]);
+                exit;
+            }
+
+            // ถ้าไม่มีข้อมูลซ้ำ เพิ่มข้อมูลใหม่
+            foreach ($rows as $key => $row) {
+                if ($key === 0) continue;
+
+                $prefix = trim(mysqli_real_escape_string($conn, $row[0]));
+                $name = trim(mysqli_real_escape_string($conn, $row[1]));
+                $surname = trim(mysqli_real_escape_string($conn, $row[2]));
+
                 $created_at = date('Y-m-d H:i:s');
                 $stmt_insert = $conn->prepare("INSERT INTO student (prefix, name, surname, id_grade, id_room, id_teacher, id_admin, created_at) 
                                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
@@ -81,5 +93,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo json_encode(['type' => 'error', 'message' => 'ไม่พบไฟล์']);
     }
 }
-
-

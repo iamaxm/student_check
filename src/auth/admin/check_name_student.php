@@ -296,9 +296,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_check'])) {
             }
         }).then(function(stream) {
             video.srcObject = stream;
-            video.setAttribute("playsinline", true); // Prevent fullscreen on iOS
+            video.setAttribute("playsinline", true);
             video.play();
-            tick(); // Start rendering video to canvas
+            tick();
         }).catch(function(error) {
             console.error("Error accessing the camera: ", error);
             loadingMessage.innerText = "🎥 ไม่สามารถเข้าถึงกล้องได้";
@@ -313,98 +313,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_check'])) {
             video.srcObject = null;
         }
         if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId); // Stop rendering
+            cancelAnimationFrame(animationFrameId);
         }
     }
 
     function playBeepSound() {
         if (beepsound) {
-            // Ensure the sound starts from the beginning
             beepsound.currentTime = 0;
-
-            // Play the sound
             beepsound.play().catch(error => {
                 console.error("Error playing beep sound:", error);
             });
         }
     }
 
-    let canScan = true; // ตัวแปรควบคุมสถานะการสแกน
+    let canScan = true;
 
-function tick() {
-    animationFrameId = requestAnimationFrame(tick);
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        loadingMessage.hidden = true;
-        canvasElement.hidden = false;
+    function tick() {
+        animationFrameId = requestAnimationFrame(tick);
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            loadingMessage.hidden = true;
+            canvasElement.hidden = false;
 
-        canvasElement.height = video.videoHeight;
-        canvasElement.width = video.videoWidth;
-        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+            canvasElement.height = video.videoHeight;
+            canvasElement.width = video.videoWidth;
+            canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
 
-        const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "dontInvert",
-        });
-
-        if (code && canScan) { // ตรวจสอบสถานะการสแกน
-            canScan = false; // ล็อกการสแกน
-            playBeepSound();
-            outputMessage.hidden = true;
-            outputData.parentElement.hidden = false;
-            outputData.innerText = code.data;
-
-            let lines = code.data.split('\n');
-            let jsonObject = {};
-
-            lines.forEach(line => {
-                let [key, value] = line.split(':').map(item => item.trim());
-                jsonObject[key] = value;
+            const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
             });
 
-            let jsonString = JSON.stringify(jsonObject, null, 2);
+            if (code && canScan) {
+                canScan = false;
+                playBeepSound();
+                outputMessage.hidden = true;
+                outputData.parentElement.hidden = false;
+                outputData.innerText = code.data;
 
-            const currentHour = new Date().getHours();
-            const currentMinutes = new Date().getMinutes() / 100;
-            const currentTimeDecimal = currentHour + currentMinutes;
+                let lines = code.data.split('\n');
+                let jsonObject = {};
 
-            // ส่งข้อมูลไปที่ backend
-            $.ajax({
-                url: 'backend/bn_check_in_out.php',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    student_id: jsonObject.student_id,
-                    hour: currentTimeDecimal // ส่งค่าเวลาไปที่ backend
-                },
-                success: function(response) {
-                    const messageType = response.message.includes("สำเร็จ") ? "success" : "error";
-                    swal({
-                        title: messageType === "success" ? "สำเร็จ!" : "เกิดข้อผิดพลาด!",
-                        text: response.message,
-                        type: messageType,
-                        timer: 2000,
-                        showConfirmButton: true
-                    });
-                },
-                error: function() {
-                    swal("เกิดข้อผิดพลาด!", "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้", "error");
-                }
-            });
+                lines.forEach(line => {
+                    let [key, value] = line.split(':').map(item => item.trim());
+                    jsonObject[key] = value;
+                });
 
-            // ปลดล็อกการสแกนหลังจาก 2 วินาที
-            setTimeout(() => {
-                canScan = true; // ปลดล็อกการสแกน
-            }, 2000);
-        } else {
-            outputMessage.hidden = false;
-            outputData.parentElement.hidden = true;
+                let jsonString = JSON.stringify(jsonObject, null, 2);
+
+                const currentHour = new Date().getHours();
+                const currentMinutes = new Date().getMinutes() / 100;
+                const currentTimeDecimal = currentHour + currentMinutes;
+
+                $.ajax({
+                    url: 'backend/bn_check_in_out.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        student_id: jsonObject.student_id,
+                        hour: currentTimeDecimal
+                    },
+                    success: function(response) {
+                        const messageType = response.message.includes("สำเร็จ") ? "success" : "error";
+                        swal({
+                            title: messageType === "success" ? "สำเร็จ!" : "เกิดข้อผิดพลาด!",
+                            text: response.message,
+                            type: messageType,
+                            timer: 2000,
+                            showConfirmButton: true
+                        });
+                    },
+                    error: function() {
+                        swal("เกิดข้อผิดพลาด!", "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้", "error");
+                    }
+                });
+
+                setTimeout(() => {
+                    canScan = true;
+                }, 4000); // รอ 3 วินาที
+            } else {
+                outputMessage.hidden = false;
+                outputData.parentElement.hidden = true;
+            }
         }
     }
-}
 
-
-
-    // Attach event listeners for modal show/hide
     const qrScannerModal = document.getElementById("qrScannerModal");
     qrScannerModal.addEventListener("shown.bs.modal", startVideoStream);
     qrScannerModal.addEventListener("hidden.bs.modal", stopVideoStream);
