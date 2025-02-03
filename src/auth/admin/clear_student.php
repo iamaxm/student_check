@@ -53,7 +53,7 @@ $grade_result = $conn->query($grade_sql);
                                     <?php endwhile; ?>
                                 </select>
                             </div>
-                            <button type="button" class="btn btn-danger" id="clear_button">ลบข้อมูลทั้งหมด</button>
+                                <center><button type="button" class="btn btn-danger" id="clear_button">ลบข้อมูลทั้งหมด</button></center>
                         </form>
                     </div>
                 </div>
