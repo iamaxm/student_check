@@ -35,7 +35,7 @@ $selected_room = isset($_POST['room_id']) ? $_POST['room_id'] : null;
 
 // Fetch students list for display, joining with room, grade, and teacher tables
 $student_sql = "
-    SELECT student.id, student.prefix, student.name, student.surname, student.created_at,
+    SELECT student.id, student.prefix, student.name, student.surname, student.created_at, student.profile_image,
            student.id_grade, student.id_room, student.id_teacher, -- Add these fields
            room.name AS room_name, grade_level.grade_level AS grade_name, 
            teacher.name AS teacher_name, teacher.surname AS teacher_surname, 
@@ -173,7 +173,7 @@ if (!$student_result) {
                                 <?php
                                 if ($student_result && $student_result->num_rows > 0) {
                                     while ($student_row = $student_result->fetch_assoc()) : ?>
-                                        <tr>
+                                      <tr data-bs-toggle="modal" data-bs-target="#viewStudentModal<?php echo $student_row['id']; ?>">
                                             <td>
                                                 <center><?php echo $student_row['prefix'] . $student_row['name']; ?></center>
                                             </td>
@@ -216,18 +216,54 @@ if (!$student_result) {
                                             </td>
                                         </tr>
 
+                                        <!-- Modal แสดงรายละเอียดนักเรียน -->
+                                       <div class="modal fade" id="viewStudentModal<?php echo $student_row['id']; ?>" tabindex="-1" aria-labelledby="viewStudentModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">รายละเอียดนักเรียน</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="text-center mb-3">
+                                                            <img src="../../uploads/<?php echo $student_row['profile_image']; ?>" 
+                                                                alt="Profile Image" width="150" height="150" 
+                                                                style="object-fit: cover; border-radius: 10px; border: 1px solid #ddd;">
+                                                        </div>
+                                                        <p><strong>ชื่อ :</strong> <?php echo $student_row['prefix'] . $student_row['name']; ?></p>
+                                                        <p><strong>นามสกุล :</strong> <?php echo $student_row['surname']; ?></p>
+                                                        <p><strong>ชั้นเรียน :</strong> <?php echo $student_row['grade_name']; ?></p>
+                                                        <p><strong>ห้องเรียน :</strong> <?php echo $student_row['room_name']; ?></p>
+                                                        <p><strong>ครูที่ดูแล :</strong> <?php echo $student_row['teacher_name'] . ' '.$student_row['teacher_surname']; ?></p>
+                                                        <p><strong>สร้างโดย :</strong> <?php echo $student_row['created_by']; ?></p>
+                                                        <p><strong>วันที่สร้าง :</strong> <?php echo date("d/m/Y H:i:s", strtotime($student_row['created_at'])); ?></p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <!-- Edit Student Modal -->
                                         <div class="modal fade" id="editStudentModal<?php echo $student_row['id']; ?>" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
-                                                    <form class="editStudentForm" data-id="<?php echo $student_row['id']; ?>">
+                                                    <form class="editStudentForm" data-id="<?php echo $student_row['id']; ?>" enctype="multipart/form-data">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">แก้ไขข้อมูลนักเรียน</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <input type="hidden" name="student_id" value="<?php echo $student_row['id']; ?>">
-
+                                                            <div class="mb-3 text-center">
+                                                                <img id="profilePreview<?php echo $student_row['id']; ?>" 
+                                                                    src="../../uploads/<?php echo $student_row['profile_image']; ?>" 
+                                                                    alt="Profile Image" 
+                                                                    width="150" 
+                                                                    height="150" 
+                                                                    style="object-fit: cover; border-radius: 10px; border: 1px solid #ddd;">
+                                                            </div>
                                                             <!-- Prefix Field -->
                                                             <div class="mb-3">
                                                                 <label for="editPrefix<?php echo $student_row['id']; ?>" class="form-label">คำนำหน้าชื่อ</label>
@@ -281,6 +317,10 @@ if (!$student_result) {
                                                                     <?php endforeach; ?>
                                                                 </select>
                                                             </div>
+                                                            <div class="mb-3">
+                                                                <label for="editProfileImage<?php echo $student_row['id']; ?>" class="form-label">อัปโหลดรูปภาพ</label>
+                                                                <input type="file" class="form-control" id="editProfileImage<?php echo $student_row['id']; ?>" name="profile_image" accept="image/*">
+                                                            </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
@@ -315,6 +355,10 @@ if (!$student_result) {
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id_admin" value="<?php echo $current_admin_id; ?>">
+                    <div class="mb-3">
+                        <label for="editProfileImage<?php echo $student_row['id']; ?>" class="form-label">อัปโหลดรูปภาพ</label>
+                        <input type="file" class="form-control" id="editProfileImage<?php echo $student_row['id']; ?>" name="profile_image" accept="image/*">
+                    </div>
                     <div class="mb-3">
                         <label for="prefix" class="form-label">คำนำหน้าชื่อ</label>
                         <select class="form-select" id="prefix" name="prefix" required>
@@ -597,12 +641,14 @@ if (!$student_result) {
     // เพิ่มนักเรียน
     $('#addStudentForm').on('submit', function(e) {
         e.preventDefault();
-
+        const formData = new FormData(this); // Create FormData object
         $.ajax({
             url: 'backend/bn_add_student.php',
             type: 'POST',
-            data: $(this).serialize(),
+            data: formData,
             dataType: 'json',
+            processData: false, // Important: Prevent jQuery from processing the data
+            contentType: false, // Important: Prevent jQuery from setting content type
             success: function(response) {
                 Swal.fire({
                     title: response.title,
@@ -621,16 +667,17 @@ if (!$student_result) {
     });
 
     // แก้ไขนักเรียน
-    $('.editStudentForm').on('submit', function(e) {
+    $('.editStudentForm').on('submit', function(e) { 
         e.preventDefault();
-        const form = $(this);
-        const studentId = form.data('id');
-
+        const formData = new FormData(this); // Create FormData object
+        
         $.ajax({
             url: 'backend/bn_edit_student.php',
             type: 'POST',
-            data: form.serialize(),
+            data: formData,
             dataType: 'json',
+            processData: false, // Important: Prevent jQuery from processing the data
+            contentType: false, // Important: Prevent jQuery from setting content type
             success: function(response) {
                 Swal.fire({
                     title: response.title,
@@ -647,6 +694,7 @@ if (!$student_result) {
             }
         });
     });
+
 
     // ลบนักเรียน
     $('.deleteStudentBtn').on('click', function() {

@@ -45,10 +45,13 @@ if (mysqli_num_rows($result_username) > 0) {
     exit;
 }
 
+// Hash the password securely
+$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
 // Insert new admin
 date_default_timezone_set('Asia/Bangkok');
 $created_at = date('Y-m-d H:i:s');
-$save_data_sql = "INSERT INTO `admin`(`username`, `password`, `created_at`) VALUES ('$username','$password','$created_at')";
+$save_data_sql = "INSERT INTO `admin`(`username`, `password`, `created_at`) VALUES ('$username','$hashed_password','$created_at')";
 
 if (mysqli_query($conn, $save_data_sql)) {
     jsonResponse("ยินดีด้วย", "สร้างแอดมินสำเร็จ!", "success", "index.php");

@@ -37,8 +37,10 @@ if (mysqli_num_rows($result_check) > 0) {
             jsonResponse("เกิดข้อผิดพลาด!", "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร", "warning");
             exit;
         } else {
+            // แฮชรหัสผ่านใหม่ก่อนที่จะอัปเดต
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             // อัปเดตทั้ง username และ password
-            $sql_update = "UPDATE admin SET username = '$username', password = '$password' WHERE id = '$admin_id'";
+            $sql_update = "UPDATE admin SET username = '$username', password = '$hashed_password' WHERE id = '$admin_id'";
         }
     } else {
         // อัปเดตเฉพาะ username โดยไม่เปลี่ยน password

@@ -31,23 +31,58 @@ if (mysqli_num_rows($result_check) > 0) {
         'type' => 'error'
     ]);
     exit;
-} else {
-    // อัปเดตข้อมูลนักเรียน
-    $sql_update = "UPDATE student SET prefix = '$prefix', name = '$name', surname = '$surname', id_grade = '$id_grade', id_room = '$id_room', id_teacher = '$id_teacher' WHERE id = '$student_id'";
+}
+
+// ตรวจสอบว่ามีการอัปโหลดไฟล์รูปภาพหรือไม่
+if (!empty($_FILES['profile_image']['name'])) {
+    $target_dir = "../../../uploads/";  // โฟลเดอร์อัปโหลด
+    $file_name = basename($_FILES['profile_image']['name']);
+    $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
+    $allowed_exts = ['jpg', 'jpeg', 'png', 'gif'];
     
-    if (mysqli_query($conn, $sql_update)) {
+    // ตรวจสอบว่านามสกุลไฟล์ถูกต้องหรือไม่
+    if (!in_array(strtolower($file_ext), $allowed_exts)) {
         echo json_encode([
-            'title' => 'สำเร็จ!',
-            'message' => 'แก้ไขข้อมูลนักเรียนสำเร็จ!',
-            'type' => 'success'
+            'title' => 'เกิดข้อผิดพลาด!',
+            'message' => 'รูปภาพต้องเป็นไฟล์ JPG, JPEG, PNG หรือ GIF เท่านั้น',
+            'type' => 'error'
         ]);
+        exit;
+    }
+
+    // ตั้งชื่อไฟล์ใหม่ให้ไม่ซ้ำกัน
+    $new_file_name = "student_" . time() . "." . $file_ext;
+    $target_file = $target_dir . $new_file_name;
+
+    // อัปโหลดไฟล์ไปยังโฟลเดอร์
+    if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $target_file)) {
+        // อัปเดตชื่อไฟล์รูปภาพลงในฐานข้อมูล
+        $sql_update = "UPDATE student SET prefix = '$prefix', name = '$name', surname = '$surname', id_grade = '$id_grade', id_room = '$id_room', id_teacher = '$id_teacher', profile_image = '$new_file_name' WHERE id = '$student_id'";
     } else {
         echo json_encode([
             'title' => 'เกิดข้อผิดพลาด!',
-            'message' => 'ไม่สามารถแก้ไขข้อมูลได้'. mysqli_error($conn),
+            'message' => 'ไม่สามารถอัปโหลดรูปภาพได้',
             'type' => 'error'
         ]);
+        exit;
     }
+} else {
+    // อัปเดตเฉพาะข้อมูลนักเรียนถ้าไม่มีการอัปโหลดรูปใหม่
+    $sql_update = "UPDATE student SET prefix = '$prefix', name = '$name', surname = '$surname', id_grade = '$id_grade', id_room = '$id_room', id_teacher = '$id_teacher' WHERE id = '$student_id'";
+}
+
+if (mysqli_query($conn, $sql_update)) {
+    echo json_encode([
+        'title' => 'สำเร็จ!',
+        'message' => 'แก้ไขข้อมูลนักเรียนสำเร็จ!',
+        'type' => 'success'
+    ]);
+} else {
+    echo json_encode([
+        'title' => 'เกิดข้อผิดพลาด!',
+        'message' => 'ไม่สามารถแก้ไขข้อมูลได้' . mysqli_error($conn),
+        'type' => 'error'
+    ]);
 }
 
 $conn->close();
